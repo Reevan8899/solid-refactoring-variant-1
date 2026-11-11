@@ -1,5 +1,6 @@
 from src.domain.calculation import OrderCalculator
 from src.domain.customer import customer_for
+from src.domain.discount_strategies import DiscountStrategyFactory
 from src.domain.validation import OrderValidator
 from src.infrastructure.audit import ListAuditLog
 from src.infrastructure.invoice import PdfInvoiceGenerator
@@ -13,7 +14,7 @@ class OrderService:
         self.audit_log = []
         self.invoices = {}
         self.repository = SQLiteOrderRepository(database)
-        self.calculator = OrderCalculator()
+        self.calculator = OrderCalculator(DiscountStrategyFactory())
         self.validator = OrderValidator()
         self.notifier = OutboxNotifier(self.outbox)
         self.audit = ListAuditLog(self.audit_log)
