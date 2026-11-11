@@ -1,0 +1,32 @@
+name: SOLID checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements.txt
+      - name: Verify unchanged legacy and characterization tests
+        run: git diff --exit-code before-refactoring -- legacy tests_before
+      - name: Verify baseline coverage
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/baseline" before-refactoring
+          cd "$RUNNER_TEMP/baseline"
+          python -m pytest tests_before -v --cov=legacy --cov-report=term --cov-fail-under=80
+      - name: Test the refactored code
+        run: python -m pytest tests_before tests_after -v --cov=src --cov-report=term-missing --cov-fail-under=85
+      - name: Evaluate Radon metrics
+        run: python -m scripts.quality_gate

@@ -1,51 +1,33 @@
-# Метрики
+# Метрики до и после
 
-## Исходная версия
+Сравниваются `legacy/bad_code.py` и файлы `src/`. Сложность измерена Radon 6.0.1. Индекс поддерживаемости взвешен по строкам кода (SLOC), пустые файлы исключены. Длина метода учитывает физические строки от объявления до конца тела.
 
-Измерена до изменений в коде.
+| Метрика | До | После | Изменение |
+|---|---:|---:|---:|
+| Средняя CC функций и методов | 1,93 | 1,50 | -0,43 |
+| Средняя CC по CLI Radon, включая классы | 2,00 | 1,74 | -0,26 |
+| Максимальная CC функции или метода | 18 | 8 | -10 |
+| Индекс поддерживаемости, взвешенный по SLOC | 36,51 | 71,41 | +34,90 |
+| Максимальная длина метода, LOC | 22 | 16 | -6 |
+| Средняя длина метода, LOC | 4,24 | 3,63 | -0,61 |
+| Методы класса `OrderProcessor` / `OrderService` | 12 | 5 | -7 |
+| Всего объявленных классов, включая протоколы | 6 | 22 | +16 |
+| Модули с исполняемыми строками | 1 | 13 | +12 |
+| Покрытие строк, % | 96,64 | 100,00 | +3,36 п. п. |
+| Тесты, прошедшие проверку | 20 | 31 | +11 |
+
+До рефакторинга выполнен только набор `tests_before`. После выполнены `tests_before` и `tests_after`. Исходный код и характеризующие тесты зафиксированы меткой `before-refactoring`.
+
+## Бенчмарк
+
+Пять запусков по 1000 заказов на каждом варианте. Используются SQLite в памяти, локальный журнал, очередь уведомлений и одинаковые PDF-счета. Порядок версий чередуется.
 
 ```text
-legacy/bad_code.py
-    M 91:4 OrderProcessor.validate - C (18)
-    M 114:4 OrderProcessor.calculate_total - B (6)
-    C 82:0 OrderProcessor - A (4)
-    C 12:0 User - A (2)
-    C 23:0 PremiumUser - A (2)
-    C 32:0 IOrderOperations - A (2)
-    C 56:0 ReadOnlyOrderView - A (2)
-    C 72:0 LegacyDatabase - A (2)
-    M 135:4 OrderProcessor.get_order - A (2)
-    M 141:4 OrderProcessor.list_orders - A (2)
-    M 147:4 OrderProcessor.cancel_order - A (2)
-    M 155:4 OrderProcessor.notify - A (2)
-    M 172:4 OrderProcessor.process_order - A (2)
-    M 13:4 User.__init__ - A (1)
-    M 16:4 User.get_email - A (1)
-    M 19:4 User.subject - A (1)
-    M 25:4 PremiumUser.get_email - A (1)
-    M 28:4 PremiumUser.subject - A (1)
-    M 35:4 IOrderOperations.get_order - A (1)
-    M 38:4 IOrderOperations.list_orders - A (1)
-    M 41:4 IOrderOperations.save_order - A (1)
-    M 44:4 IOrderOperations.cancel_order - A (1)
-    M 47:4 IOrderOperations.notify - A (1)
-    M 50:4 IOrderOperations.generate_invoice - A (1)
-    M 53:4 IOrderOperations.audit - A (1)
-    M 57:4 ReadOnlyOrderView.__init__ - A (1)
-    M 60:4 ReadOnlyOrderView.get_order - A (1)
-    M 63:4 ReadOnlyOrderView.list_orders - A (1)
-    M 66:4 ReadOnlyOrderView.unsupported - A (1)
-    M 73:4 LegacyDatabase.__init__ - A (1)
-    M 84:4 OrderProcessor.__init__ - A (1)
-    M 129:4 OrderProcessor.save_order - A (1)
-    M 161:4 OrderProcessor.audit - A (1)
-    M 164:4 OrderProcessor.generate_invoice - A (1)
-    M 184:4 OrderProcessor.close - A (1)
-
-35 blocks (classes, functions, methods) analyzed.
-Average complexity: A (2.0)
-
-legacy/bad_code.py - A (36.51)
-Required test coverage of 80% reached. Total coverage: 96.64%
-============================= 20 passed in 0.42s ==============================
+$ python -m scripts.benchmark
+1000 заказов на реализацию · 5 повторов · SQLite :memory:
+До: 0.428037, 0.421247, 0.412981, 0.414634, 0.412364 с
+До: минимум 0.412364 с, медиана 0.414634 с
+После: 0.417928, 0.412172, 0.423648, 0.418512, 0.417938 с
+После: минимум 0.412172 с, медиана 0.417938 с
+Изменение медианы: +0.80%
 ```
