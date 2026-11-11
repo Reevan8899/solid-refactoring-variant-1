@@ -1,3 +1,3 @@
 """Стабильная точка импорта процессора заказов."""
 
-from src.application.order_service import OrderService as OrderProcessor
+from src.bootstrap import OrderProcessor as OrderProcessor

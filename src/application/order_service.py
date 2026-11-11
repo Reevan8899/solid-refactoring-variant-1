@@ -1,24 +1,26 @@
 from src.domain.calculation import OrderCalculator
 from src.domain.customer import customer_for
-from src.domain.discount_strategies import DiscountStrategyFactory
+from src.domain.interfaces import AuditLog, InvoiceGenerator, OrderNotifier, OrderRepository
 from src.domain.validation import OrderValidator
-from src.infrastructure.audit import ListAuditLog
-from src.infrastructure.invoice import PdfInvoiceGenerator
-from src.infrastructure.notifier import OutboxNotifier
-from src.infrastructure.sqlite_repository import SQLiteOrderRepository
 
 
 class OrderService:
-    def __init__(self, database=":memory:"):
-        self.outbox = []
-        self.audit_log = []
-        self.invoices = {}
-        self.repository = SQLiteOrderRepository(database)
-        self.calculator = OrderCalculator(DiscountStrategyFactory())
-        self.validator = OrderValidator()
-        self.notifier = OutboxNotifier(self.outbox)
-        self.audit = ListAuditLog(self.audit_log)
-        self.invoice_generator = PdfInvoiceGenerator(self.invoices)
+    def __init__(
+        self,
+        *,
+        repository: OrderRepository,
+        calculator: OrderCalculator,
+        validator: OrderValidator,
+        notifier: OrderNotifier,
+        audit: AuditLog,
+        invoice_generator: InvoiceGenerator,
+    ):
+        self.repository = repository
+        self.calculator = calculator
+        self.validator = validator
+        self.notifier = notifier
+        self.audit = audit
+        self.invoice_generator = invoice_generator
 
     def process_order(self, data: dict) -> float:
         self.validator.validate(data)
@@ -41,6 +43,3 @@ class OrderService:
             return False
         self.audit.write("cancelled", order_id)
         return True
-
-    def close(self) -> None:
-        self.repository.close()
