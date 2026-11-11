@@ -1,24 +1,31 @@
-from abc import ABC, abstractmethod
+from typing import Protocol
+
+from src.domain.customer import EmailRecipient
 
 
-class OrderOperations(ABC):
-    @abstractmethod
-    def get_order(self, order_id): ...
+class OrderReader(Protocol):
+    def get_order(self, order_id: int) -> dict | None: ...
 
-    @abstractmethod
-    def list_orders(self): ...
+    def list_orders(self) -> list[dict]: ...
 
-    @abstractmethod
-    def save_order(self, payload): ...
 
-    @abstractmethod
-    def cancel_order(self, order_id): ...
+class OrderWriter(Protocol):
+    def save_order(self, payload: dict) -> dict: ...
 
-    @abstractmethod
-    def notify(self, order, customer): ...
+    def cancel_order(self, order_id: int) -> bool: ...
 
-    @abstractmethod
-    def generate(self, order): ...
 
-    @abstractmethod
-    def write(self, action, order_id): ...
+class OrderRepository(OrderReader, OrderWriter, Protocol):
+    """Контракт хранилища для сценариев записи и чтения заказов."""
+
+
+class OrderNotifier(Protocol):
+    def notify(self, order: dict, customer: EmailRecipient) -> None: ...
+
+
+class InvoiceGenerator(Protocol):
+    def generate(self, order: dict) -> None: ...
+
+
+class AuditLog(Protocol):
+    def write(self, action: str, order_id: int) -> None: ...
