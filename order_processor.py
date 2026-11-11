@@ -1,3 +1,3 @@
 """Стабильная точка импорта процессора заказов."""
 
-from legacy.bad_code import OrderProcessor as OrderProcessor
+from src.bootstrap import OrderProcessor as OrderProcessor
